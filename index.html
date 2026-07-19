@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HabarBerries — Маркетплейс</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        body { background-color: #000000; color: #ffffff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 100px 20px; overflow-x: hidden; }
+        .wrapper { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; }
+        .brand { text-align: center; text-transform: uppercase; letter-spacing: -1px; line-height: 0.95; margin-bottom: 32px; user-select: none; cursor: pointer; }
+        .brand .white-text { font-size: 46px; font-weight: 900; color: #ffffff; display: block; }
+        .brand .purple-text { font-size: 46px; font-weight: 900; color: #bd00ff; display: block; }
+        @keyframes screenFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .view { width: 100%; display: none; }
+        .view.active { display: block; animation: screenFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .feed-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        .preview-card { background: #0a0a0a; border: 1px solid #161616; border-radius: 24px; padding: 16px; width: 100%; cursor: pointer; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s; }
+        .preview-card:hover { border-color: #bd00ff; transform: scale(1.02); }
+        .preview-image { width: 100%; height: 300px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; background-color: #111111; border: 1px solid #161616; }
+        .preview-info { display: flex; flex-direction: column; gap: 4px; }
+        .preview-title { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; color: #ffffff; }
+        .preview-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+        .preview-price { font-size: 18px; font-weight: 900; color: #bd00ff; }
+        .preview-location { font-size: 11px; font-weight: 700; color: #555555; text-transform: uppercase; letter-spacing: 1px; }
+        .back-btn { display: inline-flex; align-items: center; color: #888888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-bottom: 20px; user-select: none; transition: color 0.2s; }
+        .back-btn:hover { color: #ffffff; }
+        .product-card { background: #0a0a0a; border: 1px solid #161616; border-radius: 24px; padding: 20px; width: 100%; }
+        .product-image { width: 100%; height: 260px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; border: 1px solid #161616; background-color: #111111; }
+        .product-title { font-size: 26px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.1; }
+        .product-price { font-size: 22px; font-weight: 900; color: #bd00ff; margin-bottom: 24px; }
+        .section-header { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #ffffff; margin-bottom: 12px; margin-top: 24px; border-left: 3px solid #bd00ff; padding-left: 8px; }
+        .ad-specs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #050505; padding: 16px; border-radius: 16px; border: 1px solid #121212; }
+        .spec-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+        .spec-label { color: #555555; text-transform: uppercase; letter-spacing: 0.5px; }
+        .spec-value { color: #ffffff; text-align: right; }
+        .ad-description { font-size: 13px; color: #888888; line-height: 1.6; font-weight: 700; margin-bottom: 24px; padding: 0 4px; }
+        .btn-contact { display: block; background: #ffffff; color: #000000; text-decoration: none; text-align: center; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s, color 0.2s, transform 0.2s; margin-bottom: 24px; }
+        .btn-contact:hover { background: #bd00ff; color: #ffffff; transform: translateY(-1px); }
+        .ad-dates { border-top: 1px solid #161616; padding-top: 16px; font-size: 11px; font-weight: 700; color: #444444; text-transform: uppercase; letter-spacing: 0.5px; display: flex; flex-direction: column; gap: 6px; }
+        .fab-btn { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; background: #bd00ff; border: none; border-radius: 50%; color: #ffffff; font-size: 32px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; box-shadow: 0 8px 24px rgba(189, 0, 255, 0.4); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
+        .fab-btn.open { transform: translateX(-50%) rotate(135deg); background: #1c1c1c; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 998; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .bottom-modal { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 360px; background: #0a0a0a; border: 1px solid #161616; border-radius: 28px 28px 0 0; padding: 32px 24px 48px 24px; z-index: 999; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-align: center; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9); }
+        .bottom-modal.open { bottom: 0; }
+        .modal-text { font-size: 15px; font-weight: 700; line-height: 1.5; color: #ffffff; margin-bottom: 24px; text-transform: uppercase; letter-spacing: -0.2px; }
+        .btn-manager { display: block; background: #bd00ff; color: #ffffff; text-decoration: none; text-align: center; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
+        .btn-manager:hover { background: #a100da; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="brand" id="logo">
+            <span class="white-text">Habar</span>
+            <span class="purple-text">Berries</span>
+        </div>
+
+        <div id="main-view" class="view active">
+            <div class="feed-container">
+                
+                <!-- НОВЫЙ ТОВАР: ГП-5М (Размер 1, за 90р) -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/1G3qrSH9/file-00000000811c8246b7416701eef1b73d.png"
+                     data-title="Противогаз гп-5м"
+                     data-price="90 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="1"
+                     data-color="Чёрный"
+                     data-condition="плохое"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="только противогаз."
+                     data-desc="Военный противогаз, используется для учений по сей день"
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/1G3qrSH9/file-00000000811c8246b7416701eef1b73d.png" alt="Противогаз гп-5м">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз гп-5м</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">90 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- НОВЫЙ ТОВАР: ГП-5М (Размер 2, за 50р) -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/kr7pkrw/file-000000000ab48246913508b2558ea163.png"
+                     data-title="Противогаз гп-5м"
+                     data-price="50 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="2"
+                     data-color="Чёрный"
+                     data-condition="плохое"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="только противогаз."
+                     data-desc="имеются три дырки и потёртости, военный противогаз используется для учений по сей день."
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/kr7pkrw/file-000000000ab48246913508b2558ea163.png" alt="Противогаз гп-5м">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз гп-5м</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">50 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТОВАР: ГП-7 -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/dsckPZks/file-00000000d0648246a4e10177a9360b02.png"
+                     data-title="Противогаз гп-7"
+                     data-price="500 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="1"
+                     data-color="Чёрный"
+                     data-condition="Новый"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="сам противогаз, фильтр без крышек"
+                     data-desc="гражданский противогаз гп-7 один из самых лучших средств защиты"
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/dsckPZks/file-00000000d0648246a4e10177a9360b02.png" alt="Противогаз гп-7">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз гп-7</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">500 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТОВАР: ППМ-88 -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/GvCrjGXW/file-000000003c60720aa0ba40b1a99b5c1a.png"
+                     data-title="Противогаз ППМ-88"
+                     data-price="1500 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="2"
+                     data-color="Чёрный"
+                     data-condition="Новый"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="Противогаз, фильтр Бриз-2001"
+                     data-desc="панорамный противогаз изготавливался в 2022 году."
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/GvCrjGXW/file-000000003c60720aa0ba40b1a99b5c1a.png" alt="Противогаз ППМ-88">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз ППМ-88</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">1500 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТОВАР: ГП-5М (за 300р) -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/GQt4GwvM/file-000000004e7c71f4b0dd451425993ed0.png"
+                     data-title="Противогаз гп-5м"
+                     data-price="300 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="1"
+                     data-color="чёрный"
+                     data-condition="новый"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="сам противогаз, фильтр гп-5м (новый)"
+                     data-desc="ещё в тальке, военный противогаз, используется по сей день на учениях"
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/GQt4GwvM/file-000000004e7c71f4b0dd451425993ed0.png" alt="Противогаз гп-5м">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз гп-5м</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">300 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТОВАР: ПБФ-ХОМЯК -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/Rkcm0692/file-00000000687881f48eb1cb10ccbe4488.png"
+                     data-title="Противогаз пбф-хомяк"
+                     data-price="1200 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="2"
+                     data-color="Белый"
+                     data-condition="новый"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="сам противогаз, фильтры вставленных"
+                     data-desc="противогаз использовался военными и полицией но вскоре его отменили"
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/Rkcm0692/file-00000000687881f48eb1cb10ccbe4488.png" alt="Противогаз пбф-хомяк">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз пбф-хомяк</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">1200 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТОВАР: ПМК-2 -->
+                <div class="preview-card" 
+                     data-img="https://i.ibb.co/hRRYRPTp/file-000000001f8c820aafc46c18d043769b.png"
+                     data-title="Противогаз пмк-2"
+                     data-price="1000 рублей"
+                     data-seller="Golden_hand12"
+                     data-size="1"
+                     data-color="чёрный"
+                     data-condition="Новый"
+                     data-city="Сортавала"
+                     data-delivery="Авито доставка"
+                     data-kit="сам противогаз, фильтр гп-7к"
+                     data-desc="военный противогаз, используется по сей день на учениях"
+                     data-link="https://t.me/Golden_hand12">
+                    <img class="preview-image" src="https://i.ibb.co/hRRYRPTp/file-000000001f8c820aafc46c18d043769b.png" alt="Противогаз пмк-2">
+                    <div class="preview-info">
+                        <div class="preview-title">Противогаз пмк-2</div>
+                        <div class="preview-meta">
+                            <div class="preview-price">1000 ₽</div>
+                            <div class="preview-location">Сортавала</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="product-view" class="view">
+            <div class="back-btn" id="go-back">← Назад к покупкам</div>
+            <div class="product-card">
+                <img class="product-image" id="p-img" src="" alt="">
+                <div class="product-title" id="p-title"></div>
+                <div class="product-price" id="p-price"></div>
+                <div class="section-header">Информация от продавца</div>
+                <div class="ad-specs">
+                    <div class="spec-row"><div class="spec-label">Продавец</div><div class="spec-value" id="p-seller"></div></div>
+                    <div class="spec-row"><div class="spec-label">Размер</div><div class="spec-value" id="p-size"></div></div>
+                    <div class="spec-row"><div class="spec-label">Цвет</div><div class="spec-value" id="p-color"></div></div>
+                    <div class="spec-row"><div class="spec-label">Состояние</div><div class="spec-value" id="p-condition"></div></div>
+                    <div class="spec-row"><div class="spec-label">Город</div><div class="spec-value" id="p-city"></div></div>
+                    <div class="spec-row"><div class="spec-label">Доставка</div><div class="spec-value" id="p-delivery"></div></div>
+                    <div class="spec-row"><div class="spec-label">В комплекте</div><div class="spec-value" id="p-kit"></div></div>
+                </div>
+                <div class="section-header">Описание</div>
+                <div class="ad-description" id="p-desc"></div>
+                <a href="" target="_blank" class="btn-contact" id="p-link">Связаться в Telegram</a>
+                <div class="ad-dates">
+                    <div>Выставлено: 19 июля 2026 г.</div>
+                    <div>Действует до: 18 августа 2026 г.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab-btn" id="fab">+</button>
+    <div class="modal-overlay" id="overlay"></div>
+    <div class="bottom-modal" id="modal">
+        <div class="modal-text">Чтобы выставить товар, напишите менеджеру</div>
+        <a href="https://t.me/Rarf_Quantium" target="_blank" class="btn-manager">Написать в Telegram</a>
+    </div>
+
+    <script>
+        const mainView = document.getElementById('main-view');
+        const productView = document.getElementById('product-view');
+        const goBackBtn = document.getElementById('go-back');
+        const logo = document.getElementById('logo');
+        const fab = document.getElementById('fab');
+        const modal = document.getElementById('modal');
+        const overlay = document.getElementById('overlay');
+        const previewCards = document.querySelectorAll('.preview-card');
+        let savedScrollPosition = 0;
+
+        previewCards.forEach(card => {
+            card.addEventListener('click', () => {
+                savedScrollPosition = window.scrollY;
+                document.getElementById('p-img').src = card.getAttribute('data-img');
+                document.getElementById('p-img').alt = card.getAttribute('data-title');
+                document.getElementById('p-title').innerText = card.getAttribute('data-title');
+                document.getElementById('p-price').innerText = card.getAttribute('data-price');
+                document.getElementById('p-seller').innerText = card.getAttribute('data-seller');
+                document.getElementById('p-size').innerText = card.getAttribute('data-size');
+                document.getElementById('p-color').innerText = card.getAttribute('data-color');
+                document.getElementById('p-condition').innerText = card.getAttribute('data-condition');
+                document.getElementById('p-city').innerText = card.getAttribute('data-city');
+                document.getElementById('p-delivery').innerText = card.getAttribute('data-delivery');
+                document.getElementById('p-kit').innerText = card.getAttribute('data-kit');
+                document.getElementById('p-desc').innerText = card.getAttribute('data-desc');
+                document.getElementById('p-link').href = card.getAttribute('data-link');
+                mainView.classList.remove('active');
+                mainView.style.display = 'none';
+                productView.style.display = 'block';
+                setTimeout(() => { productView.classList.add('active'); }, 10);
+                window.scrollTo(0, 0);
+            });
+        });
+
+        const showMain = () => {
+            productView.classList.remove('active');
+            productView.style.display = 'none';
+            mainView.style.display = 'block';
+            window.scrollTo(0, savedScrollPosition);
+            setTimeout(() => { mainView.classList.add('active'); }, 10);
+        };
+
+        goBackBtn.addEventListener('click', showMain);
+        logo.addEventListener('click', showMain);
+        const toggleModal = () => { fab.classList.toggle('open'); modal.classList.toggle('open'); overlay.classList.toggle('open'); };
+        fab.addEventListener('click', toggleModal);
+        overlay.addEventListener('click', toggleModal);
+    </script>
+</body>
+</html>
